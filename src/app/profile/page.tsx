@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAppContext } from "@/contexts/AppContext";
 import { Button } from "@/components/ui/button";
+import { generateProfileNarrative } from "@/ai/flows/profile-narrative";
+import type { EthicalProfileAnalysis } from "@/lib/ethical-profile-calculator";
 import {
   Card,
   CardContent,
@@ -55,6 +57,10 @@ export default function ProfilePage() {
   const profileRef = useRef<HTMLDivElement>(null);
   const lastAnsweredCountRef = useRef<number>(0);
 
+  // Estado para la narrativa kantiana general
+  const [kantianNarrative, setKantianNarrative] = useState<string | null>(null);
+  const [isGeneratingNarrative, setIsGeneratingNarrative] = useState(false);
+
   useEffect(() => {
     // Solo regenerar si el número de respuestas cambió
     if (
@@ -71,6 +77,33 @@ export default function ProfilePage() {
     content: () => profileRef.current,
     documentTitle: `Kantify-Perfil-${sessionUUID || "anonimo"}`,
   });
+
+  // Generar narrativa kantiana general
+  const handleGenerateNarrative = async () => {
+    if (!ethicalProfile || answeredDilemmas.length === 0) return;
+
+    setIsGeneratingNarrative(true);
+
+    try {
+      const analysis = ethicalProfile.visual_data
+        .analysis as EthicalProfileAnalysis;
+
+      const result = await generateProfileNarrative({
+        analysis,
+        answeredDilemmas,
+        totalDilemmas: answeredDilemmas.length,
+      });
+
+      setKantianNarrative(result.narrative);
+    } catch (error: any) {
+      console.error("Error generando narrativa:", error);
+      setKantianNarrative(
+        `**Error generando narrativa**\n\nNo se pudo generar la reflexión kantiana: ${error.message}\n\nPor favor, intenta de nuevo más tarde.`
+      );
+    } finally {
+      setIsGeneratingNarrative(false);
+    }
+  };
 
   if (!sessionUUID) {
     return (
@@ -170,6 +203,66 @@ export default function ProfilePage() {
             </CardContent>
           </Card>
 
+          {/* Narrativa Kantiana General */}
+          <Card className="bg-gradient-to-br from-primary/5 to-accent/5 border-primary/20">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Lightbulb className="text-primary" />
+                Reflexión Kantiana: "Y si todos..."
+              </CardTitle>
+              <CardDescription>
+                Una narrativa filosófica basada en tu perfil ético completo
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {!kantianNarrative ? (
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground mb-4">
+                    Genera una reflexión kantiana profunda basada en todas tus
+                    respuestas
+                  </p>
+                  <Button
+                    onClick={handleGenerateNarrative}
+                    disabled={isGeneratingNarrative}
+                    size="lg"
+                    className="shadow-lg"
+                  >
+                    {isGeneratingNarrative ? (
+                      <>
+                        <RefreshCw className="mr-2 h-5 w-5 animate-spin" />
+                        Generando reflexión...
+                      </>
+                    ) : (
+                      <>
+                        <Lightbulb className="mr-2 h-5 w-5" />
+                        Generar Reflexión Kantiana
+                      </>
+                    )}
+                  </Button>
+                </div>
+              ) : (
+                <div>
+                  <div className="prose prose-sm max-w-none">
+                    <div className="whitespace-pre-wrap text-foreground leading-relaxed">
+                      {kantianNarrative}
+                    </div>
+                  </div>
+                  <div className="mt-4 flex justify-end">
+                    <Button
+                      onClick={handleGenerateNarrative}
+                      variant="outline"
+                      size="sm"
+                      disabled={isGeneratingNarrative}
+                    >
+                      <RefreshCw className="mr-2 h-4 w-4" />
+                      Regenerar
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
           <div>
             <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
               <MessageSquareQuote className="text-accent" />
@@ -195,10 +288,23 @@ export default function ProfilePage() {
                         </div>
                       </AccordionTrigger>
                       <AccordionContent className="px-4 pt-2 pb-4 space-y-3 bg-background/50 rounded-b-md">
-                        <p>
-                          <strong>Tu Respuesta (escala 0-1):</strong>{" "}
-                          {item.userResponse.toFixed(2)}
-                        </p>
+                        <div className="flex items-center gap-4 p-3 bg-primary/5 rounded-lg border border-primary/20">
+                          <div className="flex-1">
+                            <p className="text-sm text-muted-foreground mb-1">
+                              Tu Respuesta:
+                            </p>
+                            <div className="text-3xl font-bold text-primary">
+                              {item.userResponse.toFixed(2)}
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {item.userResponse < 0.3
+                                ? "❌ Rechazo (0.00 = No)"
+                                : item.userResponse < 0.7
+                                ? "🤔 Neutral (0.50 = Indeciso)"
+                                : "✅ Aceptación (1.00 = Sí)"}
+                            </p>
+                          </div>
+                        </div>
                         <p>
                           <strong>Tópico:</strong>{" "}
                           {item.dilemma.topico_principal}
@@ -206,19 +312,8 @@ export default function ProfilePage() {
                         <p>
                           <strong>Intensidad:</strong> {item.dilemma.intensidad}
                         </p>
-                        {item.kantianNarrative && (
-                          <div className="mt-2 p-3 border rounded-md bg-accent/10">
-                            <h5 className="font-semibold flex items-center gap-1.5 text-primary">
-                              <Lightbulb size={16} /> Reflexión Kantiana ("Y si
-                              todos..."):
-                            </h5>
-                            <p className="text-sm text-muted-foreground mt-1">
-                              {item.kantianNarrative}
-                            </p>
-                          </div>
-                        )}
-                        <p className="text-xs text-muted-foreground mt-2">
-                          Respondido el:{" "}
+                        <p className="text-xs text-muted-foreground mt-4">
+                          📅 Respondido el:{" "}
                           {new Date(item.timestamp).toLocaleString("es-ES")}
                         </p>
                       </AccordionContent>

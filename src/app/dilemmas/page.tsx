@@ -49,7 +49,6 @@ export default function DilemmasPage() {
   } = useAppContext();
 
   const [sliderValue, setSliderValue] = useState<number>(0.5);
-  const [showReflection, setShowReflection] = useState<boolean>(false);
   const [selectedTopic, setSelectedTopic] = useState<EthicalTopic>(
     ethicalTopics[0]
   );
@@ -62,13 +61,12 @@ export default function DilemmasPage() {
       // Consider redirecting or handling in AppContext if session is crucial before this page
     }
     setSliderValue(0.5);
-    setShowReflection(false);
   }, [currentDilemma?.id_dilema, sessionUUID]);
 
   const handleAnswer = async () => {
     if (currentDilemma) {
       await answerAndReflect(sliderValue);
-      setShowReflection(true);
+      // El siguiente dilema se carga automáticamente en answerAndReflect
     }
   };
 
@@ -150,105 +148,121 @@ export default function DilemmasPage() {
             {currentDilemma.texto_dilema}
           </p>
 
-          {!showReflection && (
-            <>
-              <div className="px-4">
-                <Slider
-                  value={[sliderValue]}
-                  onValueChange={(value) => setSliderValue(value[0])}
-                  min={0}
-                  max={1}
-                  step={0.01}
-                  disabled={isLoadingAi}
-                  aria-label="Control deslizante de respuesta al dilema"
-                />
+          {/* Valor actual del slider - Grande y visible */}
+          <div className="text-center mb-6">
+            <div className="inline-block bg-primary/10 px-6 py-3 rounded-lg border-2 border-primary/20">
+              <span className="text-sm text-muted-foreground font-medium">
+                Tu respuesta:
+              </span>
+              <div className="text-4xl font-bold text-primary mt-1">
+                {sliderValue.toFixed(2)}
               </div>
-              <div className="flex justify-between text-sm text-muted-foreground px-1">
-                <span>Inclínate a la Izquierda (ej. No)</span>
-                <span>Inclínate a la Derecha (ej. Sí)</span>
-              </div>
-            </>
-          )}
+            </div>
+          </div>
+
+          {/* Slider mejorado */}
+          <div className="px-4 py-2">
+            <Slider
+              value={[sliderValue]}
+              onValueChange={(value) => setSliderValue(value[0])}
+              min={0}
+              max={1}
+              step={0.01}
+              disabled={isLoadingAi}
+              aria-label="Control deslizante de respuesta al dilema"
+              className="cursor-pointer"
+            />
+          </div>
+
+          {/* Etiquetas mejoradas con valores */}
+          <div className="flex justify-between items-center text-sm px-1 mt-4">
+            <div className="text-left">
+              <div className="font-bold text-destructive text-base">0.00 = No</div>
+              <div className="text-xs text-muted-foreground">Rechazo total</div>
+            </div>
+            <div className="text-center">
+              <div className="font-semibold text-muted-foreground">0.50 = Neutral</div>
+              <div className="text-xs text-muted-foreground">Indeciso</div>
+            </div>
+            <div className="text-right">
+              <div className="font-bold text-green-600 text-base">1.00 = Sí</div>
+              <div className="text-xs text-muted-foreground">Aceptación total</div>
+            </div>
+          </div>
         </CardContent>
         <CardFooter className="flex flex-col sm:flex-row justify-between gap-4 pt-6">
-          {!showReflection ? (
-            <Button
-              onClick={handleAnswer}
-              disabled={isLoadingAi}
-              className="w-full sm:w-auto shadow-md"
-            >
-              {isLoadingAi && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Enviar y Reflexionar
-            </Button>
-          ) : (
-            <div className="flex flex-col sm:flex-row gap-2 w-full">
-              <Button
-                onClick={handleNextCorpusDilemma}
-                variant="outline"
-                className="flex-1 shadow-sm"
-              >
-                <SkipForward className="mr-2 h-4 w-4" /> Siguiente Dilema
-                (Corpus)
-              </Button>
-              <Button
-                onClick={handleGenerateNewDilemma}
-                variant="outline"
-                className="flex-1 shadow-sm"
-                disabled={isLoadingAi}
-              >
-                {isLoadingAi && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                )}
-                <Wand2 className="mr-2 h-4 w-4" /> Generar Dilema Manual
-              </Button>
-            </div>
-          )}
+          <Button
+            onClick={handleAnswer}
+            disabled={isLoadingAi}
+            className="w-full shadow-md text-lg py-6"
+          >
+            {isLoadingAi && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
+            {isLoadingAi ? "Cargando siguiente dilema..." : "Enviar Respuesta →"}
+          </Button>
         </CardFooter>
       </Card>
 
-      {showReflection && (
-        <div className="w-full max-w-2xl mt-4 p-4 bg-card border rounded-lg shadow">
-          <p className="text-sm text-muted-foreground mb-2">
-            Generar un nuevo dilema basado en:
-          </p>
-          <div className="flex gap-2 mb-2">
-            <Select
-              value={selectedTopic}
-              onValueChange={(value) => setSelectedTopic(value as EthicalTopic)}
-              disabled={isLoadingAi}
-            >
-              <SelectTrigger className="flex-1">
-                <SelectValue placeholder="Seleccionar Tópico" />
-              </SelectTrigger>
-              <SelectContent>
-                {ethicalTopics.map((topic) => (
-                  <SelectItem key={topic} value={topic}>
-                    {topic}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select
-              value={selectedIntensity}
-              onValueChange={(value) =>
-                setSelectedIntensity(value as DilemmaIntensity)
-              }
-              disabled={isLoadingAi}
-            >
-              <SelectTrigger className="flex-1">
-                <SelectValue placeholder="Seleccionar Intensidad" />
-              </SelectTrigger>
-              <SelectContent>
-                {dilemmaIntensities.map((intensity) => (
-                  <SelectItem key={intensity} value={intensity}>
-                    {intensity}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+      {/* Opciones avanzadas (opcional) */}
+      <div className="w-full max-w-2xl mt-4 p-4 bg-card/50 border rounded-lg shadow-sm">
+        <p className="text-sm text-muted-foreground mb-3 text-center">
+          O genera un dilema personalizado:
+        </p>
+        <div className="flex gap-2 mb-2">
+          <Select
+            value={selectedTopic}
+            onValueChange={(value) => setSelectedTopic(value as EthicalTopic)}
+            disabled={isLoadingAi}
+          >
+            <SelectTrigger className="flex-1">
+              <SelectValue placeholder="Seleccionar Tópico" />
+            </SelectTrigger>
+            <SelectContent>
+              {ethicalTopics.map((topic) => (
+                <SelectItem key={topic} value={topic}>
+                  {topic}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select
+            value={selectedIntensity}
+            onValueChange={(value) =>
+              setSelectedIntensity(value as DilemmaIntensity)
+            }
+            disabled={isLoadingAi}
+          >
+            <SelectTrigger className="flex-1">
+              <SelectValue placeholder="Seleccionar Intensidad" />
+            </SelectTrigger>
+            <SelectContent>
+              {dilemmaIntensities.map((intensity) => (
+                <SelectItem key={intensity} value={intensity}>
+                  {intensity}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-      )}
+        <div className="flex gap-2">
+          <Button
+            onClick={handleNextCorpusDilemma}
+            variant="outline"
+            className="flex-1"
+            disabled={isLoadingAi}
+          >
+            <SkipForward className="mr-2 h-4 w-4" /> Dilema del Corpus
+          </Button>
+          <Button
+            onClick={handleGenerateNewDilemma}
+            variant="outline"
+            className="flex-1"
+            disabled={isLoadingAi}
+          >
+            {isLoadingAi && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            <Wand2 className="mr-2 h-4 w-4" /> Generar con IA
+          </Button>
+        </div>
+      </div>
 
       <div className="w-full max-w-2xl mt-8">
         <Progress value={progressPercentage} className="w-full h-2" />

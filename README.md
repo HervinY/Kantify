@@ -1,100 +1,379 @@
-# Proyecto Kantify
+# 🤔 Kantify - Explorador de Ética Kantiana
 
-## Resumen del Proyecto
-Kantify es una aplicación web interactiva que aplica el experimento de universalización de Kant para ayudar a los usuarios a reflexionar sobre las consecuencias éticas globales de sus decisiones cotidianas.
+<div align="center">
 
-## Objetivos Clave
-1.  **Sesión 100% anónima**: Garantizar la privacidad del usuario sin recolección de datos personales.
-2.  **Interacción con Dilemas Éticos**: Presentar preguntas con sliders para respuestas matizadas, cubriendo 6 tópicos éticos.
-3.  **Feedback Inmediato y Narrativa**: Proveer una narrativa reflexiva estilo “Y si todos...” basada en IA.
-4.  **Perfil Ético Descargable**: Permitir la exportación de un perfil ético anónimo.
+**Una aplicación web interactiva que aplica el Imperativo Categórico de Kant para reflexionar sobre las implicaciones éticas de nuestras decisiones**
 
-## Stack Tecnológico
-*   **Framework**: Next.js (con App Router)
-*   **Lenguaje**: TypeScript
-*   **UI**: React, Tailwind CSS, ShadCN UI Components
-*   **Inteligencia Artificial**: Google Genkit (con Gemini) para generación de dilemas y narrativas.
-*   **Gestión de Estado (Cliente)**: React Context API
-*   **Persistencia de Sesión (Cliente)**: LocalStorage
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)](https://nextjs.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![Groq](https://img.shields.io/badge/Groq-FF6600?style=for-the-badge&logo=ai&logoColor=white)](https://groq.com/)
 
-## Estructura del Proyecto (Next.js)
-*   `src/app/`: Rutas principales de la aplicación (inicio, dilemas, perfil).
-*   `src/components/`: Componentes React reutilizables (UI, layout).
-*   `src/contexts/`: Lógica de estado global del cliente (ej: `AppContext.tsx`).
-*   `src/lib/`: Utilidades, tipos TypeScript (`types.ts`).
-*   `src/ai/flows/`: Flujos de Genkit predefinidos para la lógica de IA.
-*   `src/data/`: Datos estáticos (ej: `corpus_dilemas.json`).
-*   `public/`: Archivos estáticos (imágenes, etc.).
+</div>
 
-## Cómo Empezar
-1.  **Clonar el repositorio**:
-    ```bash
-    git clone https://github.com/your-username/kantify.git
-    cd kantify
-    ```
-2.  **Crear y activar entorno virtual** (opcional pero recomendado para gestión de Node.js/npm si usas nvm):
-    ```bash
-    # Ejemplo con nvm
-    # nvm use
-    ```
-3.  **Instalar dependencias**:
-    ```bash
-    npm install
-    # o yarn install
-    ```
-4.  **Configurar variables de entorno**:
-    Crea un archivo `.env.local` en la raíz del proyecto. Necesitarás configurar las credenciales para Google AI (Gemini) si los flujos de Genkit lo requieren para ejecutarse localmente.
-    ```env
-    GOOGLE_API_KEY=TU_API_KEY_DE_GOOGLE_AI
-    # Otras variables si son necesarias para Genkit
-    ```
-5.  **Correr la aplicación en modo desarrollo**:
-    ```bash
-    npm run dev
-    # o yarn dev
-    ```
-    La aplicación estará disponible en `http://localhost:9002` (o el puerto que hayas configurado).
+---
 
-6.  **(Opcional) Correr Genkit en modo desarrollo** (si necesitas interactuar directamente con los flujos o ver logs de Genkit):
-    Abre otra terminal y ejecuta:
-    ```bash
-    npm run genkit:dev
-    # o npm run genkit:watch para recargar automáticamente
-    ```
+## 📋 Tabla de Contenidos
 
-## Épicas del Proyecto (Conceptuales)
-*   **E1: Gestión de Sesión Anónima**: Manejo de sesión de usuario anónima en el cliente.
-*   **E2: Interacción Ética y Respuestas**: Presentación de dilemas y captura de respuestas del usuario.
-*   **E3: Inteligencia Artificial y Feedback Ético**: Integración con Genkit para generación de dilemas dinámicos y narrativas kantianas.
-*   **E4: Backend con API (FastAPI)**: Reemplazado por Server Actions y API Routes de Next.js.
-*   **E5: Frontend Interactivo (Streamlit + Plotly)**: Implementado con React, Next.js y componentes ShadCN. Posibles visualizaciones con Recharts (integrado en ShadCN charts) o Plotly.js.
+- [Resumen](#-resumen)
+- [Características](#-características)
+- [Stack Tecnológico](#-stack-tecnológico)
+- [Arquitectura](#-arquitectura)
+- [Instalación](#-instalación)
+- [Configuración](#-configuración)
+- [Uso](#-uso)
+- [Estructura del Proyecto](#-estructura-del-proyecto)
+- [Mejores Prácticas](#-mejores-prácticas)
+- [Roadmap](#-roadmap)
+- [Contribución](#-contribución)
+- [Licencia](#-licencia)
 
-## Metodología Scrum
-*   **Duración del Sprint**: 2 semanas.
-*   **Ceremonias Clave**:
-    *   Daily Standup (15 min).
-    *   Sprint Planning (2-4 horas).
-    *   Sprint Review (1-2 horas).
-    *   Sprint Retrospective (1-1.5 horas).
-*   **Definition of Done (Inicial)**:
-    1.  Código revisado y fusionado a la rama principal.
-    2.  Funcionalidad probada (manual o automáticamente según el caso).
-    3.  Cumple con los criterios de aceptación de la Historia de Usuario.
-    4.  Documentación actualizada (si aplica).
-    5.  No introduce regresiones conocidas.
+---
 
-## Consideraciones sobre la Base de Datos
-Para esta versión Next.js, la persistencia de datos del usuario se maneja principalmente en el lado del cliente (`localStorage`) para mantener el anonimato y la simplicidad. El corpus de dilemas se carga desde un archivo JSON.
-Si en el futuro se requiere persistencia centralizada (incluso anonimizada para análisis agregado con consentimiento), se podrían considerar bases de datos como Firebase Firestore, Supabase (PostgreSQL) o Neon. SQLite no es una opción común para despliegues de Next.js en producción.
+## 🎯 Resumen
 
-## Próximos Pasos / Enfoque Sprint 0-1 (Ejemplo)
-*   **Sprint 0: Configuración y Normas**
-    *   Configuración completa del entorno de desarrollo.
-    *   Establecimiento de guías de estilo de código y convenciones de Git.
-    *   Despliegue inicial básico en una plataforma (ej: Vercel, Firebase Hosting).
-*   **Sprint 1: MVP Mínimo Navegable**
-    *   (HU-XXX) Implementar la carga y visualización del primer dilema desde el corpus.
-    *   (HU-YYY) Permitir respuesta del usuario mediante slider.
-    *   (HU-ZZZ) Integrar la generación de la narrativa kantiana para el primer dilema.
-    *   (HU-AAA) Flujo básico de navegación entre Inicio, Dilemas y Perfil (mock).
+**Kantify** es una plataforma web que permite a los usuarios explorar dilemas éticos y reflexionar sobre las consecuencias de universalizar sus decisiones, siguiendo el **Imperativo Categórico** de Immanuel Kant.
 
+### Filosofía del Proyecto
+
+El proyecto se basa en la pregunta kantiana fundamental:
+
+> **"¿Qué pasaría si todos actuaran como tú?"**
+
+A través de dilemas éticos interactivos, los usuarios exploran cómo sus decisiones individuales afectarían al mundo si todos las adoptaran como ley universal.
+
+---
+
+## ✨ Características
+
+### 🔒 Privacidad y Anonimato
+- **100% anónimo**: Sin registro de usuarios ni recolección de datos personales
+- **Persistencia local**: Los datos se almacenan únicamente en el navegador del usuario
+- **Sin tracking**: Cero seguimiento de actividad o analytics invasivos
+
+### 🧠 Inteligencia Artificial
+- **Generación dinámica de dilemas**: Dilemas éticos personalizados generados con IA
+- **Reflexiones kantianas**: Narrativas "Y si todos..." generadas automáticamente
+- **Powered by Groq**: Modelos LLaMA 3.3 de código abierto y gratuitos
+- **RAG (Retrieval-Augmented Generation)**: Dilemas contextualizados basados en tus respuestas previas
+
+### 🎨 Experiencia de Usuario
+- **Interfaz intuitiva**: Diseño limpio y accesible con ShadCN UI
+- **Respuestas matizadas**: Sliders continuos (0.00 - 1.00) para respuestas más precisas
+- **Feedback visual en tiempo real**: Valor actual visible mientras ajustas tu respuesta
+- **Perfil ético exportable**: Descarga tu perfil en PDF
+
+### 📊 Tópicos Éticos
+1. ⏰ **Temporalidad Moral**: Decisiones que afectan al futuro
+2. 👥 **Alteridad Radical**: Empatía y perspectiva del otro
+3. ⚖️ **Imperativo de Universalización**: Principios universalizables
+4. 🔍 **Ontología de la Ignorancia**: Límites del conocimiento moral
+5. 💰 **Economía Moral del Deseo**: Ética del consumo y el deseo
+6. 🏠 **Microética Cotidiana**: Decisiones éticas del día a día
+
+---
+
+## 🛠 Stack Tecnológico
+
+### Frontend
+- **Framework**: [Next.js 15](https://nextjs.org/) con App Router
+- **Lenguaje**: [TypeScript](https://www.typescriptlang.org/)
+- **Estilos**: [Tailwind CSS](https://tailwindcss.com/)
+- **Componentes UI**: [ShadCN UI](https://ui.shadcn.com/)
+- **Iconos**: [Lucide React](https://lucide.dev/)
+
+### Inteligencia Artificial
+- **Proveedor**: [Groq](https://groq.com/) (Gratuito)
+- **Modelo**: LLaMA 3.3 70B Versatile
+- **SDK**: groq-sdk
+- **Funciones**: Generación de dilemas y reflexiones kantianas
+
+### Estado y Persistencia
+- **Gestión de Estado**: React Context API
+- **Persistencia**: LocalStorage (cliente)
+- **Validación**: Zod
+
+### DevOps
+- **Control de versiones**: Git
+- **Gestor de paquetes**: npm
+- **Bundler**: Turbopack (Next.js 15)
+- **Variables de entorno**: dotenv
+
+---
+
+## 🏗 Arquitectura
+
+```
+┌─────────────────────────────────────────┐
+│          Usuario (Navegador)            │
+└─────────────────┬───────────────────────┘
+                  │
+                  ▼
+┌─────────────────────────────────────────┐
+│        Next.js Frontend (React)         │
+│  ┌───────────────────────────────────┐  │
+│  │    App Router (Pages/Routes)      │  │
+│  │  /dilemmas    /profile    /       │  │
+│  └───────────────────────────────────┘  │
+│  ┌───────────────────────────────────┐  │
+│  │     Context API (Estado Global)   │  │
+│  │  - AppContext (sesión, dilemas)   │  │
+│  └───────────────────────────────────┘  │
+│  ┌───────────────────────────────────┐  │
+│  │      LocalStorage (Cliente)       │  │
+│  │  - Respuestas anónimas            │  │
+│  │  - UUID de sesión                 │  │
+│  └───────────────────────────────────┘  │
+└─────────────────┬───────────────────────┘
+                  │ Server Actions
+                  ▼
+┌─────────────────────────────────────────┐
+│       Next.js Server (Backend)          │
+│  ┌───────────────────────────────────┐  │
+│  │   AI Flows (Server Actions)       │  │
+│  │  - generateKantianNarrative()     │  │
+│  │  - generatePersonalizedDilemma()  │  │
+│  └───────────────┬───────────────────┘  │
+└──────────────────┼─────────────────────┘
+                   │ API REST
+                   ▼
+┌─────────────────────────────────────────┐
+│            Groq API (LLaMA 3.3)         │
+│  - Generación de dilemas éticos         │
+│  - Reflexiones kantianas                │
+│  - JSON mode para respuestas            │
+└─────────────────────────────────────────┘
+```
+
+---
+
+## 🚀 Instalación
+
+### Prerrequisitos
+- **Node.js**: >= 18.x
+- **npm**: >= 9.x (viene con Node.js)
+- **Cuenta Groq**: [Obtener API Key gratuita](https://console.groq.com/)
+
+### Pasos
+
+1. **Clonar el repositorio**
+   ```bash
+   git clone https://github.com/tu-usuario/kantify.git
+   cd kantify
+   ```
+
+2. **Instalar dependencias**
+   ```bash
+   npm install
+   ```
+
+3. **Configurar variables de entorno**
+
+   Copia el archivo de ejemplo:
+   ```bash
+   cp .env.example .env.local
+   ```
+
+   Edita `.env.local` y agrega tu API key de Groq:
+   ```env
+   GROQ_API_KEY=tu_clave_groq_aqui
+   ```
+
+4. **Ejecutar en modo desarrollo**
+   ```bash
+   npm run dev
+   ```
+
+5. **Abrir en el navegador**
+
+   Visita [http://localhost:9002](http://localhost:9002)
+
+---
+
+## ⚙️ Configuración
+
+### Variables de Entorno
+
+| Variable | Descripción | Requerido | Default |
+|----------|-------------|-----------|---------|
+| `GROQ_API_KEY` | API Key de Groq para modelos LLaMA | ✅ Sí | - |
+
+### Obtener tu API Key de Groq (Gratis)
+
+1. Ve a [https://console.groq.com/](https://console.groq.com/)
+2. Crea una cuenta gratuita
+3. Navega a "API Keys"
+4. Crea una nueva key
+5. Cópiala y pégala en `.env.local`
+
+---
+
+## 📖 Uso
+
+### Flujo de Usuario
+
+1. **Inicio**: El usuario llega a la página de inicio
+2. **Sesión anónima**: Se genera automáticamente un UUID de sesión
+3. **Dilemas**: Se presentan dilemas éticos uno a uno
+4. **Respuesta**: El usuario responde con un slider (0.00 - 1.00)
+5. **Reflexión**: La IA genera una reflexión kantiana personalizada
+6. **Perfil**: El usuario puede ver y descargar su perfil ético
+
+### Interpretación de Valores
+
+- **0.00**: ❌ No / Rechazo total de la acción
+- **0.50**: 🤔 Neutral / Indeciso
+- **1.00**: ✅ Sí / Aceptación total de la acción
+
+Los valores intermedios permiten expresar matices éticos más precisos.
+
+---
+
+## 📁 Estructura del Proyecto
+
+```
+kantify/
+├── src/
+│   ├── app/                      # Next.js App Router
+│   │   ├── page.tsx              # Página de inicio
+│   │   ├── dilemmas/             # Página de dilemas
+│   │   │   └── page.tsx
+│   │   ├── profile/              # Página de perfil
+│   │   │   └── page.tsx
+│   │   └── layout.tsx            # Layout global
+│   │
+│   ├── ai/                       # Lógica de IA
+│   │   └── flows/
+│   │       ├── generate-dilemma.ts           # Generación de dilemas
+│   │       └── kantian-reflection-narrative.ts  # Reflexiones kantianas
+│   │
+│   ├── components/               # Componentes React
+│   │   ├── ui/                   # ShadCN UI components
+│   │   ├── Navbar.tsx
+│   │   └── ...
+│   │
+│   ├── contexts/                 # React Context API
+│   │   └── AppContext.tsx        # Estado global de la app
+│   │
+│   ├── lib/                      # Utilidades
+│   │   ├── groq-client.ts        # Cliente Groq configurado
+│   │   ├── api-client.ts         # Cliente API RAG
+│   │   ├── types.ts              # Tipos TypeScript
+│   │   └── utils.ts              # Funciones auxiliares
+│   │
+│   └── data/                     # Datos estáticos
+│       └── corpus_dilemas.json   # Corpus de dilemas iniciales
+│
+├── public/                       # Archivos estáticos
+├── .env.local                    # Variables de entorno (NO subir a Git)
+├── .env.example                  # Template de variables de entorno
+├── .gitignore                    # Archivos ignorados por Git
+├── package.json                  # Dependencias del proyecto
+├── tsconfig.json                 # Configuración TypeScript
+├── tailwind.config.ts            # Configuración Tailwind
+├── next.config.ts                # Configuración Next.js
+└── README.md                     # Este archivo
+```
+
+---
+
+## 🎯 Mejores Prácticas
+
+### Seguridad
+- ✅ **API Keys en variables de entorno**: Nunca en el código
+- ✅ **.env.local en .gitignore**: No subir credenciales a Git
+- ✅ **Server Actions**: Lógica de IA en el servidor
+- ✅ **Validación con Zod**: Inputs validados antes de procesarse
+
+### Código Limpio
+- ✅ **TypeScript estricto**: Tipado completo
+- ✅ **Componentes reutilizables**: DRY (Don't Repeat Yourself)
+- ✅ **Nomenclatura clara**: Variables y funciones descriptivas
+- ✅ **Comentarios útiles**: Documentación inline cuando es necesario
+
+### Performance
+- ✅ **Server Actions**: Reducen bundle size del cliente
+- ✅ **Turbopack**: Bundler ultrarrápido de Next.js 15
+- ✅ **Lazy loading**: Componentes cargados bajo demanda
+- ✅ **LocalStorage**: Evita llamadas innecesarias al servidor
+
+### UX/UI
+- ✅ **Feedback visual**: Estados de carga y errores claros
+- ✅ **Responsive design**: Funciona en mobile, tablet y desktop
+- ✅ **Accesibilidad**: ARIA labels y navegación por teclado
+- ✅ **Valores decimales visibles**: Transparencia en las respuestas
+
+---
+
+## 🗺 Roadmap
+
+### ✅ Fase 1: MVP (Completado)
+- [x] Configuración del proyecto con Next.js 15
+- [x] Sistema de dilemas del corpus
+- [x] Integración con Groq (LLaMA 3.3)
+- [x] Sliders interactivos con valores decimales
+- [x] Reflexiones kantianas generadas por IA
+- [x] Perfil ético descargable en PDF
+
+### 🚧 Fase 2: Mejoras (En desarrollo)
+- [ ] Visualizaciones interactivas con Recharts
+- [ ] Sistema de niveles de dilemas progresivos
+- [ ] Mundos distópicos/utópicos generados por IA
+- [ ] Redes neuronales bayesianas para análisis de perfil
+- [ ] Modo oscuro/claro
+
+### 🔮 Fase 3: Futuro
+- [ ] Comparación anónima agregada de perfiles
+- [ ] Dilemas generados por la comunidad
+- [ ] Traducción a múltiples idiomas
+- [ ] Modo educativo para instituciones
+- [ ] API pública para desarrolladores
+
+---
+
+## 🤝 Contribución
+
+¡Las contribuciones son bienvenidas! Este es un proyecto personal, pero si quieres colaborar:
+
+1. **Fork** el proyecto
+2. Crea una **rama** para tu feature (`git checkout -b feature/AmazingFeature`)
+3. **Commit** tus cambios (`git commit -m 'Add some AmazingFeature'`)
+4. **Push** a la rama (`git push origin feature/AmazingFeature`)
+5. Abre un **Pull Request**
+
+### Guía de Contribución
+- Sigue las convenciones de código existentes
+- Escribe tests si es aplicable
+- Actualiza la documentación si es necesario
+- Mantén los commits claros y descriptivos
+
+---
+
+## 📄 Licencia
+
+Este proyecto es de uso personal y educativo.
+
+---
+
+## 🙏 Agradecimientos
+
+- **Immanuel Kant**: Por el Imperativo Categórico
+- **Groq**: Por proporcionar acceso gratuito a LLaMA 3.3
+- **Vercel**: Por Next.js
+- **ShadCN**: Por los componentes UI
+
+---
+
+## 📞 Contacto
+
+**Proyecto personal** - Para consultas o feedback, abre un issue en GitHub.
+
+---
+
+<div align="center">
+
+**Hecho con 🧠 y ❤️ para la reflexión ética**
+
+[⬆ Volver arriba](#-kantify---explorador-de-ética-kantiana)
+
+</div>

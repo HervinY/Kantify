@@ -17,7 +17,10 @@ import type {
 } from "@/lib/types";
 import AllDilemmasSeed from "@/data/corpus_dilemas.json";
 import { ragApiClient, type RAGDilemmaRequest } from "@/lib/api-client";
-import { generateKantianNarrative } from "@/ai/flows/kantian-reflection-narrative";
+import {
+  calculateEthicalProfile,
+  generateProfileSummary,
+} from "@/lib/ethical-profile-calculator";
 import { useToast } from "@/hooks/use-toast";
 
 interface AppState {
@@ -165,36 +168,34 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
     setIsLoadingAi(true);
 
     try {
-      // Paso 1: Generar la reflexión kantiana
-      const narrativeResult = await generateKantianNarrative({
-        dilemmaText: currentDilemma.texto_dilema,
-        userResponse: responseValue,
-        topic: currentDilemma.topico_principal,
-      });
-
+      // Solo guardamos la respuesta, SIN generar narrativa kantiana
       const { kantianNarrative, ...originalDilemmaForRecord } = currentDilemma;
 
       const newAnsweredDilemma: AnsweredDilemma = {
         dilemma: originalDilemmaForRecord as AnyDilemma,
         userResponse: responseValue,
-        kantianNarrative: narrativeResult.narrative,
+        kantianNarrative: null, // Se generará solo en el perfil final
         timestamp: new Date(),
       };
 
       setAnsweredDilemmas((prev) => [...prev, newAnsweredDilemma]);
-      setCurrentDilemma((prev) =>
-        prev ? { ...prev, kantianNarrative: narrativeResult.narrative } : null
-      );
 
-      // Paso 2: Generar automáticamente un nuevo dilema con RAG
+      // Mostrar toast de éxito
+      toast({
+        title: "¡Respuesta guardada!",
+        description: `Has respondido ${answeredDilemmas.length + 1} dilema(s). Continúa reflexionando.`,
+        variant: "default",
+      });
+
+      // Cargar el siguiente dilema automáticamente
+      // Intentar generar uno con RAG, si falla usar corpus
       try {
         const userContext = `El usuario ha respondido a ${
           answeredDilemmas.length + 1
         } dilemas. La última respuesta sobre el tópico '${
           currentDilemma.topico_principal
-        }' fue ${responseValue}.`;
+        }' fue ${responseValue.toFixed(2)}.`;
 
-        // Usar el mismo tópico del dilema actual o uno aleatorio
         const availableTopics = [
           "Temporalidad Moral",
           "Alteridad Radical",
@@ -226,47 +227,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
           source: "rag",
         };
 
-        // Esperar un momento para que el usuario vea la reflexión, luego cambiar el dilema
-        setTimeout(() => {
-          setCurrentDilemma({ ...newRAGDilemma, kantianNarrative: null });
-          setIsLoadingAi(false);
-          toast({
-            title: "Nuevo dilema generado",
-            description: `Dilema sobre "${result.topic}" listo para responder.`,
-            variant: "default",
-          });
-        }, 2000);
+        setCurrentDilemma({ ...newRAGDilemma, kantianNarrative: null });
       } catch (ragError: any) {
-        console.error("Error generando dilema RAG:", ragError);
-        // Fallback: siguiente dilema del corpus después de un momento
-        setTimeout(() => {
-          getNextDilemmaFromCorpus();
-          setIsLoadingAi(false);
-        }, 2000);
+        console.log("RAG no disponible, usando corpus:", ragError.message);
+        // Fallback: siguiente dilema del corpus
+        getNextDilemmaFromCorpus();
       }
+
+      setIsLoadingAi(false);
     } catch (error: any) {
-      console.error("Error generando la narrativa Kantiana:", error);
+      console.error("Error guardando respuesta:", error);
       toast({
-        title: "Error de IA",
-        description: `No se pudo generar la reflexión kantiana: ${
+        title: "Error",
+        description: `No se pudo guardar la respuesta: ${
           error.message || "Error desconocido"
         }`,
         variant: "destructive",
       });
-      const { kantianNarrative, ...originalDilemmaForRecord } = currentDilemma;
-      const newAnsweredDilemma: AnsweredDilemma = {
-        dilemma: originalDilemmaForRecord as AnyDilemma,
-        userResponse: responseValue,
-        kantianNarrative:
-          "Error al generar la reflexión. Por favor, inténtalo más tarde o revisa la consola para más detalles.",
-        timestamp: new Date(),
-      };
-      setAnsweredDilemmas((prev) => [...prev, newAnsweredDilemma]);
-      setCurrentDilemma((prev) =>
-        prev
-          ? { ...prev, kantianNarrative: "Error al generar la reflexión." }
-          : null
-      );
       setIsLoadingAi(false);
     }
   };
@@ -359,6 +336,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const generateProfile = useCallback(() => {
     setIsLoadingAi(true);
+
     if (answeredDilemmas.length === 0) {
       setEthicalProfile({
         summary:
@@ -370,39 +348,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
       return;
     }
 
-    const topicsCovered = new Set(
-      answeredDilemmas.map((ad) => ad.dilemma.topico_principal)
-    );
-    const summary = `Has reflexionado sobre ${answeredDilemmas.length} dilema(s) cubriendo ${topicsCovered.size} tópico(s) ético(s) único(s).`;
-
-    const responsesPerTopic: Record<string, number[]> = {};
-    answeredDilemmas.forEach((ad) => {
-      if (!responsesPerTopic[ad.dilemma.topico_principal]) {
-        responsesPerTopic[ad.dilemma.topico_principal] = [];
-      }
-      responsesPerTopic[ad.dilemma.topico_principal].push(ad.userResponse);
-    });
-
-    const averageResponsePerTopic: Record<string, number> = {};
-    for (const topic in responsesPerTopic) {
-      const responses = responsesPerTopic[topic];
-      averageResponsePerTopic[topic] =
-        responses.reduce((a, b) => a + b, 0) / responses.length;
-    }
+    // Usar el nuevo sistema de cálculo de perfil ético
+    const analysis = calculateEthicalProfile(answeredDilemmas);
+    const summary = generateProfileSummary(analysis, answeredDilemmas.length);
 
     setEthicalProfile({
       summary,
       visual_data: {
         totalAnswered: answeredDilemmas.length,
-        topicsList: Array.from(topicsCovered),
-        averageResponsePerTopic,
+        topicsList: Object.keys(analysis.topicAverages),
+        averageResponsePerTopic: analysis.topicAverages,
+        analysis, // Incluir el análisis completo
       },
       answeredDilemmas: [...answeredDilemmas].sort(
         (a, b) => b.timestamp.getTime() - a.timestamp.getTime()
       ),
     });
+
     setIsLoadingAi(false);
-  }, [answeredDilemmas]); // Solo depende de answeredDilemmas
+  }, [answeredDilemmas]);
 
   const clearSession = () => {
     if (sessionUUID) {

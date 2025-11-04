@@ -1,78 +1,98 @@
 'use server';
 /**
- * @fileOverview A Genkit flow for generating a Kantian reflection narrative based on user choices.
+ * @fileOverview Generación de reflexiones kantianas usando Groq (LLaMA 3.3)
  *
- * - generateKantianNarrative - A function that generates the narrative.
- * - KantianNarrativeInput - The input type for the generateKantianNarrative function.
- * - KantianNarrativeOutput - The return type for the generateKantianNarrative function.
+ * - generateKantianNarrative - Genera una reflexión kantiana basada en las elecciones del usuario
+ * - KantianNarrativeInput - Tipo de entrada para la generación
+ * - KantianNarrativeOutput - Tipo de salida
  */
 
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import { generateWithGroq } from '@/lib/groq-client';
+import { z } from 'zod';
 
+// Esquemas de validación
 const KantianNarrativeInputSchema = z.object({
-  dilemmaText: z.string().describe('The text of the ethical dilemma.'),
-  userResponse: z.number().describe('The user\u2019s response to the dilemma (a number between 0 and 1).'),
-  topic: z.string().describe('The ethical topic of the dilemma.'),
+  dilemmaText: z.string(),
+  userResponse: z.number(),
+  topic: z.string(),
 });
 
 export type KantianNarrativeInput = z.infer<typeof KantianNarrativeInputSchema>;
 
 const KantianNarrativeOutputSchema = z.object({
-  narrative: z.string().describe('A narrative explaining the consequences of universalizing the user\u2019s response, using a \'What if everyone...\' format.'),
+  narrative: z.string(),
 });
 
-export type KantianNarrativeOutput = z.infer<typeof KantianNarrativeOutputSchema>;
+export type KantianNarrativeOutput = z.infer<
+  typeof KantianNarrativeOutputSchema
+>;
 
+/**
+ * Genera una reflexión kantiana usando Groq
+ */
 export async function generateKantianNarrative(
   input: KantianNarrativeInput
 ): Promise<KantianNarrativeOutput> {
-  return kantianReflectionNarrativeFlow(input);
-}
+  const { dilemmaText, userResponse, topic } = input;
 
-const kantianNarrativePrompt = ai.definePrompt({
-  name: 'kantianNarrativePrompt',
-  input: {schema: KantianNarrativeInputSchema},
-  output: {schema: KantianNarrativeOutputSchema},
-  prompt: `You are an AI assistant designed to help users reflect on the ethical implications of their decisions from a Kantian perspective.
-
-You will receive the text of an ethical dilemma, the user's response (a number between 0 and 1), and the ethical topic of the dilemma.
-
-Your task is to generate a short narrative (around 100-150 words) that explains the potential consequences of universalizing the user's response, using a "What if everyone..." format.
-
-The narrative should:
-
-*   Clearly state the user's implied maxim (the principle behind their action) based on their response.
-*   Explain what would happen if everyone acted according to that maxim.
-*   Highlight any contradictions, harms, or undesirable consequences that would arise from the universalization of the maxim.
-*   Offer a concise reflection on the ethical implications of the user's choice from a Kantian perspective, focusing on the importance of acting according to principles that could be universal laws.
-*   Be written in a clear, accessible, and engaging style, in Spanish.
-
-Here's the information:
-
-Dilemma: {{{dilemmaText}}}
-User Response (0-1): {{{userResponse}}}
-Topic: {{{topic}}}
-
-Devuelve tu respuesta como un objeto JSON con la siguiente estructura:
-{
-  "narrative": "La narrativa kantiana aquí..."
-}
-
-JSON Output:`,
-});
-
-const kantianReflectionNarrativeFlow = ai.defineFlow(
-  {
-    name: 'kantianReflectionNarrativeFlow',
-    inputSchema: KantianNarrativeInputSchema,
-    outputSchema: KantianNarrativeOutputSchema,
-  },
-  async input => {
-    const {output} = await kantianNarrativePrompt(input);
-    if (!output || !output.narrative) {
-      throw new Error('La IA no pudo generar la narrativa en el formato esperado.');
-    }
-    return output;
+  // Interpretar la respuesta del usuario
+  let responseInterpretation = '';
+  if (userResponse < 0.3) {
+    responseInterpretation =
+      'tendiendo hacia el rechazo o negación de la acción propuesta';
+  } else if (userResponse < 0.7) {
+    responseInterpretation =
+      'mostrando ambivalencia o una postura moderada ante la acción';
+  } else {
+    responseInterpretation =
+      'tendiendo hacia la aceptación o afirmación de la acción propuesta';
   }
-);
+
+  const systemPrompt = `Eres un asistente de IA experto en filosofía kantiana diseñado para ayudar a los usuarios a reflexionar sobre las implicaciones éticas de sus decisiones.
+
+Tu especialidad es aplicar el Imperativo Categórico de Kant para analizar dilemas morales desde la perspectiva de la universalización de máximas.`;
+
+  const userPrompt = `Analiza el siguiente dilema ético desde una perspectiva kantiana:
+
+**Dilema:** ${dilemmaText}
+
+**Respuesta del usuario (escala 0-1):** ${userResponse.toFixed(2)} - ${responseInterpretation}
+
+**Tópico ético:** ${topic}
+
+Genera una reflexión breve (100-150 palabras) en formato "Y si todos..." que:
+
+1. Identifique claramente la máxima implícita (el principio detrás de su acción) basándose en su respuesta
+2. Explique qué pasaría si todos actuaran según esa máxima
+3. Destaque cualquier contradicción, daño o consecuencia indeseable que surgiría de la universalización de esa máxima
+4. Ofrezca una reflexión concisa sobre las implicaciones éticas de la elección del usuario desde una perspectiva kantiana, enfocándose en la importancia de actuar según principios que podrían ser leyes universales
+5. Esté escrita en un estilo claro, accesible y cautivador, EN ESPAÑOL
+
+Devuelve tu respuesta ÚNICAMENTE como un objeto JSON válido con esta estructura exacta:
+{
+  "narrative": "La narrativa kantiana aquí en español..."
+}`;
+
+  try {
+    const response = await generateWithGroq<{ narrative: string }>({
+      systemPrompt,
+      userPrompt,
+      temperature: 0.7, // Equilibrio entre creatividad y coherencia
+    });
+
+    if (!response.narrative || response.narrative.trim() === '') {
+      throw new Error(
+        'La IA no pudo generar la narrativa en el formato esperado.'
+      );
+    }
+
+    return { narrative: response.narrative };
+  } catch (error: any) {
+    console.error('Error generando narrativa kantiana:', error);
+    throw new Error(
+      `No se pudo generar la reflexión kantiana: ${
+        error.message || 'Error desconocido'
+      }`
+    );
+  }
+}
