@@ -69,26 +69,26 @@ ${exampleDilemmas}
 
 Ahora, como narrador filosófico kantiano, genera una narrativa envolvente (250-350 palabras) que:
 
-🌍 **CONSTRUYE UN MUNDO**: Imagina y describe vívidamente cómo sería un mundo donde TODOS adoptaran estas máximas como ley universal.
+🌍 **CONSTRUYE UN MUNDO EN TERCERA PERSONA**: Describe vívidamente cómo SERÍA un mundo donde TODOS adoptaran estas máximas como ley universal.
 
-📖 **CUENTA UNA HISTORIA**: No listes métricas. Narra escenarios concretos, pinta escenas, describe consecuencias tangibles.
+📖 **NARRA EN TERCERA PERSONA**: Usa verbos en futuro o condicional: "Las ciudades serían...", "Las calles resonarían...", "Los vecindarios tendrían...", "La gente viviría..."
 
-🎭 **USA METÁFORAS Y EJEMPLOS**: "Imagina una ciudad donde...", "Piensa en un vecindario donde...", "Visualiza una sociedad en la que..."
+🎭 **EJEMPLOS CONCRETOS**: "En ese mundo, las ciudades estarían llenas de...", "Los barrios se caracterizarían por...", "Las plazas públicas verían..."
 
-💭 **SIN NÚMEROS NI PORCENTAJES**: Jamás digas "78% de aceptación" o "promedio de 0.79". En su lugar: "una fuerte inclinación hacia...", "una clara tendencia a...", "un patrón de apertura predominante..."
+💭 **CERO NÚMEROS O PORCENTAJES**: Jamás digas "78% de aceptación" o "promedio de 0.79". En su lugar: "una fuerte inclinación hacia...", "una clara tendencia a...", "un patrón de apertura predominante..."
 
-🔮 **EXPLORA CONSECUENCIAS REALES**: ¿Qué le pasaría a las relaciones humanas? ¿Al medio ambiente? ¿A la confianza social? ¿A las generaciones futuras?
+🔮 **CONSECUENCIAS TANGIBLES**: ¿Cómo serían las relaciones humanas? ¿El medio ambiente? ¿La confianza social? ¿Las generaciones futuras?
 
-⚡ **IDENTIFICA TENSIONES**: Si hay contradicciones, narrálas como dilemas vivos: "Por un lado... pero por otro..."
+⚡ **TENSIONES NARRATIVAS**: Si hay contradicciones, narrálas: "Por un lado, las personas... pero por otro, la sociedad..."
 
-❓ **TERMINA CON UNA PREGUNTA PROFUNDA**: Que invite a reflexionar sobre la universalizabilidad de sus principios.
+❓ **PREGUNTA FINAL PROFUNDA**: En tercera persona o reflexiva, que invite a pensar sobre universalizabilidad.
 
-**ESTILO REQUERIDO:**
-- Narrativo y evocador (como una historia)
+**PERSPECTIVA OBLIGATORIA:**
+- TERCERA PERSONA: "Las ciudades serían...", "La gente viviría...", "Los barrios tendrían..."
+- NUNCA segunda persona: NO "Imagina", NO "Visualiza", NO "Piensa en"
+- Narrativo como un cuento sobre un mundo alternativo
 - Filosóficamente profundo pero accesible
-- Poético sin ser cursi
 - EN ESPAÑOL, con lenguaje vivo y concreto
-- Sin juzgar, pero sí desafiando al pensamiento
 
 Devuelve ÚNICAMENTE un objeto JSON:
 {
@@ -112,33 +112,39 @@ Devuelve ÚNICAMENTE un objeto JSON:
   } catch (error: any) {
     console.error('Error generando narrativa del perfil:', error);
 
-    // Narrativa de fallback más envolvente
+    // Narrativa de fallback en tercera persona
     const worldType = analysis.overallTendency > 0.6
-      ? 'un mundo donde las puertas se abren antes de ser tocadas, donde la confianza precede a la evidencia'
+      ? 'En ese mundo, las puertas se abrirían antes de ser tocadas, y la confianza precedería a la evidencia'
       : analysis.overallTendency < 0.4
-      ? 'un mundo de murallas cuidadosamente construidas, donde cada paso es meditado y cada riesgo, sopesado'
-      : 'un mundo de equilibristas morales, donde cada decisión pende de un hilo entre la apertura y la cautela';
+      ? 'Sería un mundo de murallas cuidadosamente construidas, donde cada paso sería meditado y cada riesgo, sopesado'
+      : 'Sería un mundo de equilibristas morales, donde cada decisión pendería de un hilo entre la apertura y la cautela';
 
     return {
-      narrative: `Imagina por un momento ${worldType}.
+      narrative: `${worldType}.
 
-Has reflexionado sobre ${totalDilemmas} dilemas morales, y en cada uno has dejado una huella, un rastro de tus principios más íntimos. Tus elecciones, como fragmentos de un espejo roto, revelan un patrón: ${
+Tras reflexionar sobre ${totalDilemmas} dilemas morales, este perfil ético revela un patrón fascinante: ${
         analysis.consistency > 0.6
           ? 'una firmeza que atraviesa situaciones distintas como un hilo de oro en una tela compleja'
           : 'una flexibilidad que se adapta al contexto, como un río que encuentra su cauce en cada terreno'
       }.
 
-Desde la mirada de Kant, tus respuestas construyen una máxima implícita, un principio que guía tu brújula moral. Si este principio se convirtiera en ley universal, si cada persona en el planeta lo adoptara mañana al despertar, viviríamos en una sociedad muy particular.
+Desde la perspectiva kantiana, estas decisiones construyen una máxima implícita, un principio que guiaría la brújula moral de toda una sociedad. Si este principio se convirtiera en ley universal, si cada persona en el planeta lo adoptara mañana al despertar, el mundo cambiaría profundamente.
 
-Las calles resonarían con ${
+Las calles de ese mundo resonarían con ${
         analysis.distribution.acceptance > 50
-          ? 'el murmullo de "sí" constantes, de brazos abiertos y riesgos asumidos. Pero, ¿qué pasaría cuando todos dijeran sí simultáneamente? ¿Quién se detendría a preguntarse si deberíamos?'
+          ? 'el murmullo de "sí" constantes, de brazos abiertos y riesgos asumidos. Las personas abrazarían oportunidades sin hesitar, pero quizás faltaría quien se detuviera a preguntarse: ¿deberíamos?'
           : analysis.distribution.rejection > 50
-          ? 'el eco de precauciones y puertas cerradas. Un mundo más seguro, quizás, pero ¿a qué costo? ¿Cuántas posibilidades quedarían sin explorar?'
+          ? 'el eco de precauciones y puertas cerradas. La sociedad sería más segura, quizás, pero a costa de dejar inexploradas infinitas posibilidades'
           : 'una danza constante entre el sí y el no, entre abrir y cerrar, entre avanzar y detenerse. Un equilibrio precario, pero equilibrio al fin'
       }
 
-La pregunta que Kant te haría, observando este mundo que tus principios construirían, es simple pero profunda: ¿Podrías vivir en él? ¿Te reconocerías en un mundo donde tu máxima personal se convierte en la norma de todos?`,
+${
+        analysis.patterns.mostConservativeTopic && analysis.patterns.mostLiberalTopic
+          ? `La tensión más fascinante surgiría entre ${analysis.patterns.mostLiberalTopic} (donde la apertura reinaría) y ${analysis.patterns.mostConservativeTopic} (donde la cautela prevalecería). Esta contradicción plantearía una pregunta inevitable: `
+          : 'La pregunta fundamental que este mundo plantearía sería: '
+      }¿puede una sociedad sostenerse cuando sus principios morales ${
+        analysis.consistency > 0.6 ? 'son coherentes pero quizás rígidos' : 'son flexibles pero quizás inconsistentes'
+      }?`,
     };
   }
 }

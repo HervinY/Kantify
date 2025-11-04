@@ -189,15 +189,89 @@ export default function ProfilePage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p>{ethicalProfile.summary}</p>
-              {Object.keys(ethicalProfile.visual_data).length > 0 && (
-                <div className="mt-4 p-4 border rounded-md bg-secondary/10">
-                  <h4 className="font-semibold mb-2">
-                    Datos Clave (para visualizaciones futuras):
-                  </h4>
-                  <pre className="text-xs whitespace-pre-wrap bg-muted/50 p-2 rounded">
-                    {JSON.stringify(ethicalProfile.visual_data, null, 2)}
-                  </pre>
+              <div className="prose prose-sm max-w-none">
+                <p className="text-base leading-relaxed whitespace-pre-line">
+                  {ethicalProfile.summary}
+                </p>
+              </div>
+
+              {/* Visualización mejorada de datos */}
+              {ethicalProfile.visual_data.analysis && (
+                <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Tópicos Explorados */}
+                  <div className="p-4 rounded-lg bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20">
+                    <h4 className="font-semibold text-sm text-primary mb-3 flex items-center gap-2">
+                      📚 Tópicos Explorados
+                    </h4>
+                    <div className="space-y-2">
+                      {Object.entries(
+                        ethicalProfile.visual_data.analysis.topicAverages
+                      ).map(([topic, avg]) => (
+                        <div key={topic} className="flex items-center justify-between text-sm">
+                          <span className="text-muted-foreground">{topic}</span>
+                          <div className="flex items-center gap-2">
+                            <div className="w-20 h-2 bg-secondary rounded-full overflow-hidden">
+                              <div
+                                className="h-full bg-primary"
+                                style={{ width: `${(avg as number) * 100}%` }}
+                              />
+                            </div>
+                            <span className="font-mono font-semibold text-xs w-12 text-right">
+                              {(avg as number).toFixed(2)}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Métricas de Consistencia */}
+                  <div className="p-4 rounded-lg bg-gradient-to-br from-accent/5 to-accent/10 border border-accent/20">
+                    <h4 className="font-semibold text-sm text-accent mb-3 flex items-center gap-2">
+                      🎯 Consistencia Ética
+                    </h4>
+                    <div className="space-y-3">
+                      <div>
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="text-xs text-muted-foreground">
+                            Coherencia general
+                          </span>
+                          <span className="text-sm font-semibold">
+                            {(
+                              (ethicalProfile.visual_data.analysis.consistency as number) *
+                              100
+                            ).toFixed(0)}
+                            %
+                          </span>
+                        </div>
+                        <div className="w-full h-2 bg-secondary rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-accent"
+                            style={{
+                              width: `${
+                                (ethicalProfile.visual_data.analysis.consistency as number) *
+                                100
+                              }%`,
+                            }}
+                          />
+                        </div>
+                      </div>
+                      <div className="text-xs text-muted-foreground pt-2 border-t">
+                        <div className="flex justify-between py-1">
+                          <span>Más consistente:</span>
+                          <span className="font-medium">
+                            {ethicalProfile.visual_data.analysis.patterns.mostConsistentTopic}
+                          </span>
+                        </div>
+                        <div className="flex justify-between py-1">
+                          <span>Más variable:</span>
+                          <span className="font-medium">
+                            {ethicalProfile.visual_data.analysis.patterns.leastConsistentTopic}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
             </CardContent>

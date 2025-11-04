@@ -184,20 +184,32 @@ export function generateProfileSummary(
 
   const topicCount = Object.keys(analysis.topicAverages).length;
 
-  return `Has reflexionado sobre ${totalDilemmas} dilema(s) éticos, cubriendo ${topicCount} tópico(s) filosóficos.
+  // Interpretación narrativa de la distribución
+  let distributionText = '';
+  if (distribution.acceptance > 60) {
+    distributionText = 'La mayoría de tus decisiones muestran apertura y aceptación ante los dilemas éticos presentados';
+  } else if (distribution.rejection > 60) {
+    distributionText = 'Predomina la cautela y el escepticismo en tus decisiones morales';
+  } else if (distribution.neutral > 40) {
+    distributionText = 'Tu enfoque ético tiende a la ambivalencia reflexiva, evaluando cada situación con matices';
+  } else {
+    distributionText = 'Tus decisiones revelan un equilibrio entre apertura, cautela y reflexión contextual';
+  }
 
-Tu perfil revela una tendencia ética ${tendencyText}, con un patrón de decisión ${consistencyText}.
+  return `Has reflexionado sobre ${totalDilemmas} dilema${totalDilemmas === 1 ? '' : 's'} ético${totalDilemmas === 1 ? '' : 's'}, explorando ${topicCount} dimensión${topicCount === 1 ? '' : 'es'} de la filosofía moral.
 
-📊 Distribución de tus respuestas:
-• ${distribution.rejection.toFixed(0)}% tienden al rechazo
-• ${distribution.neutral.toFixed(0)}% son neutrales o ambivalentes
-• ${distribution.acceptance.toFixed(0)}% tienden a la aceptación
+Tu perfil revela una tendencia ética **${tendencyText}**, con un patrón de decisión **${consistencyText}**. ${distributionText}.
 
 ${
-  patterns.mostConservativeTopic && patterns.mostLiberalTopic
-    ? `🔍 Patrones identificados:
-• Más cauteloso en: ${patterns.mostConservativeTopic}
-• Más abierto en: ${patterns.mostLiberalTopic}`
+  patterns.mostConservativeTopic && patterns.mostLiberalTopic && patterns.mostConservativeTopic !== patterns.mostLiberalTopic
+    ? `\n🔍 **Patrones identificados:**
+• Mayor cautela en **${patterns.mostConservativeTopic}**
+• Mayor apertura en **${patterns.mostLiberalTopic}**
+
+Esta tensión entre tópicos revela una ética multidimensional que adapta sus principios según el contexto.`
+    : patterns.mostConsistentTopic
+    ? `\n🎯 **Patrón destacado:**
+Muestras mayor consistencia en tus decisiones sobre **${patterns.mostConsistentTopic}**, lo que sugiere principios bien definidos en esta área.`
     : ''
 }`;
 }
