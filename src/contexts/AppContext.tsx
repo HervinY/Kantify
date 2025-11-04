@@ -178,21 +178,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({
         timestamp: new Date(),
       };
 
+      // Actualizar estado y calcular el nuevo total
+      const newTotal = answeredDilemmas.length + 1;
       setAnsweredDilemmas((prev) => [...prev, newAnsweredDilemma]);
 
-      // Mostrar toast de éxito
+      // Mostrar toast de éxito con el total correcto
       toast({
         title: "¡Respuesta guardada!",
-        description: `Has respondido ${answeredDilemmas.length + 1} dilema(s). Continúa reflexionando.`,
+        description: `Has respondido ${newTotal} dilema${newTotal === 1 ? '' : 's'}. Continúa reflexionando.`,
         variant: "default",
       });
 
       // Cargar el siguiente dilema automáticamente
       // Intentar generar uno con RAG, si falla usar corpus
       try {
-        const userContext = `El usuario ha respondido a ${
-          answeredDilemmas.length + 1
-        } dilemas. La última respuesta sobre el tópico '${
+        const userContext = `El usuario ha respondido a ${newTotal} dilemas. La última respuesta sobre el tópico '${
           currentDilemma.topico_principal
         }' fue ${responseValue.toFixed(2)}.`;
 

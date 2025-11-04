@@ -44,51 +44,55 @@ export async function generateProfileNarrative(
     })
     .join('\n');
 
-  const systemPrompt = `Eres un filósofo experto en ética kantiana, especializado en analizar perfiles morales completos y generar reflexiones profundas sobre las implicaciones de universalizar patrones de conducta.
+  const systemPrompt = `Eres un narrador filosófico magistral, especializado en ética kantiana. Tu don especial es transformar patrones de decisiones morales en narrativas evocadoras que transportan al lector a mundos posibles.
 
-Tu tarea es generar una narrativa inspiradora y reflexiva que ayude al usuario a entender las consecuencias éticas de sus decisiones desde una perspectiva kantiana.`;
+Escribe como un híbrido entre Immanuel Kant y Gabriel García Márquez: profundidad filosófica con narrativa envolvente. Tu estilo es:
+- Narrativo y evocador, NO técnico ni académico
+- Construyes mundos y escenarios, NO listas métricas
+- Usas metáforas y ejemplos concretos, NO porcentajes
+- Hablas de personas, sociedades y consecuencias reales
+- Tu tono es reflexivo, poético y profundo`;
 
-  const userPrompt = `Analiza el siguiente perfil ético completo y genera una narrativa kantiana profunda:
+  const userPrompt = `Has explorado el alma moral de alguien que ha reflexionado sobre ${totalDilemmas} dilemas éticos. Sus decisiones revelan patrones fascinantes:
 
-**Resumen del perfil:**
-- Total de dilemas respondidos: ${totalDilemmas}
-- Tendencia general (0-1): ${analysis.overallTendency.toFixed(2)}
-- Consistencia ética: ${(analysis.consistency * 100).toFixed(0)}%
-
-**Promedios por tópico ético:**
+**Sus mundos morales:**
 ${topicSummaries}
 
-**Distribución de respuestas:**
-- Rechazo (< 0.3): ${analysis.distribution.rejection.toFixed(0)}%
-- Neutral (0.3-0.7): ${analysis.distribution.neutral.toFixed(0)}%
-- Aceptación (> 0.7): ${analysis.distribution.acceptance.toFixed(0)}%
+**El corazón de su filosofía:**
+${analysis.patterns.mostConservativeTopic ? `Muestra mayor cautela en: ${analysis.patterns.mostConservativeTopic}` : ''}
+${analysis.patterns.mostLiberalTopic ? `Abraza con mayor apertura: ${analysis.patterns.mostLiberalTopic}` : ''}
 
-**Patrones identificados:**
-- Más conservador en: ${analysis.patterns.mostConservativeTopic || 'N/A'}
-- Más liberal en: ${analysis.patterns.mostLiberalTopic || 'N/A'}
-- Más consistente en: ${analysis.patterns.mostConsistentTopic || 'N/A'}
-
-**Ejemplos de dilemas respondidos:**
+**Algunos de sus dilemas:**
 ${exampleDilemmas}
 
-Genera una narrativa (200-300 palabras) en formato "Y si todos..." que:
+---
 
-1. Identifique las máximas éticas implícitas en los patrones de respuesta del usuario
-2. Explore qué pasaría si TODOS adoptaran estos principios como ley universal
-3. Destaque contradicciones, virtudes o consecuencias notables
-4. Ofrezca una reflexión kantiana sobre la coherencia ética del perfil
-5. Termine con una pregunta reflexiva que invite a la introspección
+Ahora, como narrador filosófico kantiano, genera una narrativa envolvente (250-350 palabras) que:
 
-La narrativa debe ser:
-- Profunda pero accesible
-- Respetuosa y no juzgadora
-- Inspiradora y constructiva
-- EN ESPAÑOL
-- Con un tono filosófico pero cálido
+🌍 **CONSTRUYE UN MUNDO**: Imagina y describe vívidamente cómo sería un mundo donde TODOS adoptaran estas máximas como ley universal.
 
-Devuelve ÚNICAMENTE un objeto JSON con esta estructura:
+📖 **CUENTA UNA HISTORIA**: No listes métricas. Narra escenarios concretos, pinta escenas, describe consecuencias tangibles.
+
+🎭 **USA METÁFORAS Y EJEMPLOS**: "Imagina una ciudad donde...", "Piensa en un vecindario donde...", "Visualiza una sociedad en la que..."
+
+💭 **SIN NÚMEROS NI PORCENTAJES**: Jamás digas "78% de aceptación" o "promedio de 0.79". En su lugar: "una fuerte inclinación hacia...", "una clara tendencia a...", "un patrón de apertura predominante..."
+
+🔮 **EXPLORA CONSECUENCIAS REALES**: ¿Qué le pasaría a las relaciones humanas? ¿Al medio ambiente? ¿A la confianza social? ¿A las generaciones futuras?
+
+⚡ **IDENTIFICA TENSIONES**: Si hay contradicciones, narrálas como dilemas vivos: "Por un lado... pero por otro..."
+
+❓ **TERMINA CON UNA PREGUNTA PROFUNDA**: Que invite a reflexionar sobre la universalizabilidad de sus principios.
+
+**ESTILO REQUERIDO:**
+- Narrativo y evocador (como una historia)
+- Filosóficamente profundo pero accesible
+- Poético sin ser cursi
+- EN ESPAÑOL, con lenguaje vivo y concreto
+- Sin juzgar, pero sí desafiando al pensamiento
+
+Devuelve ÚNICAMENTE un objeto JSON:
 {
-  "narrative": "La narrativa kantiana completa aquí..."
+  "narrative": "Tu narrativa kantiana envolvente aquí, sin métricas, solo mundo e historia..."
 }`;
 
   try {
@@ -108,30 +112,33 @@ Devuelve ÚNICAMENTE un objeto JSON con esta estructura:
   } catch (error: any) {
     console.error('Error generando narrativa del perfil:', error);
 
-    // Narrativa de fallback
+    // Narrativa de fallback más envolvente
+    const worldType = analysis.overallTendency > 0.6
+      ? 'un mundo donde las puertas se abren antes de ser tocadas, donde la confianza precede a la evidencia'
+      : analysis.overallTendency < 0.4
+      ? 'un mundo de murallas cuidadosamente construidas, donde cada paso es meditado y cada riesgo, sopesado'
+      : 'un mundo de equilibristas morales, donde cada decisión pende de un hilo entre la apertura y la cautela';
+
     return {
-      narrative: `**Reflexión sobre tu Perfil Ético**
+      narrative: `Imagina por un momento ${worldType}.
 
-Has explorado ${totalDilemmas} dilemas morales, revelando patrones únicos en tu razonamiento ético.
-
-Con una tendencia general de ${analysis.overallTendency.toFixed(2)} (donde 0 es muy conservador y 1 es muy liberal), tus decisiones muestran ${
-        analysis.consistency > 0.6 ? 'coherencia notable' : 'flexibilidad adaptativa'
-      } en diferentes contextos éticos.
-
-Desde una perspectiva kantiana, tus respuestas sugieren que estás navegando el complejo territorio entre principios universales y situaciones particulares.
-
-**¿Qué nos dice esto?**
-
-Si todos adoptaran tu patrón de decisión, veríamos un mundo donde ${
-        analysis.distribution.acceptance > 50
-          ? 'la apertura y la aceptación predominan'
-          : analysis.distribution.rejection > 50
-          ? 'la cautela y el escepticismo son valorados'
-          : 'el equilibrio y la moderación guían las acciones'
+Has reflexionado sobre ${totalDilemmas} dilemas morales, y en cada uno has dejado una huella, un rastro de tus principios más íntimos. Tus elecciones, como fragmentos de un espejo roto, revelan un patrón: ${
+        analysis.consistency > 0.6
+          ? 'una firmeza que atraviesa situaciones distintas como un hilo de oro en una tela compleja'
+          : 'una flexibilidad que se adapta al contexto, como un río que encuentra su cauce en cada terreno'
       }.
 
-**Pregunta para reflexionar:**
-¿Tus decisiones podrían convertirse en ley universal sin generar contradicciones? ¿Qué ajustes harías a tus principios éticos después de esta reflexión?`,
+Desde la mirada de Kant, tus respuestas construyen una máxima implícita, un principio que guía tu brújula moral. Si este principio se convirtiera en ley universal, si cada persona en el planeta lo adoptara mañana al despertar, viviríamos en una sociedad muy particular.
+
+Las calles resonarían con ${
+        analysis.distribution.acceptance > 50
+          ? 'el murmullo de "sí" constantes, de brazos abiertos y riesgos asumidos. Pero, ¿qué pasaría cuando todos dijeran sí simultáneamente? ¿Quién se detendría a preguntarse si deberíamos?'
+          : analysis.distribution.rejection > 50
+          ? 'el eco de precauciones y puertas cerradas. Un mundo más seguro, quizás, pero ¿a qué costo? ¿Cuántas posibilidades quedarían sin explorar?'
+          : 'una danza constante entre el sí y el no, entre abrir y cerrar, entre avanzar y detenerse. Un equilibrio precario, pero equilibrio al fin'
+      }
+
+La pregunta que Kant te haría, observando este mundo que tus principios construirían, es simple pero profunda: ¿Podrías vivir en él? ¿Te reconocerías en un mundo donde tu máxima personal se convierte en la norma de todos?`,
     };
   }
 }
