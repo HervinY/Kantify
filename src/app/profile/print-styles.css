@@ -1,0 +1,129 @@
+/* Estilos específicos para la impresión del PDF del Perfil Ético */
+
+@media print {
+  /* Ocultar elementos innecesarios */
+  .print\\:hidden {
+    display: none !important;
+  }
+
+  /* Configuración de página */
+  @page {
+    size: A4;
+    margin: 1.5cm;
+  }
+
+  body {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  /* Fuentes más legibles para impresión */
+  * {
+    font-family: 'Georgia', 'Times New Roman', serif;
+  }
+
+  /* Título del perfil */
+  .profile-title {
+    color: #1e40af !important;
+    font-size: 28pt !important;
+    margin-bottom: 0.5cm;
+    border-bottom: 2pt solid #1e40af;
+    padding-bottom: 0.3cm;
+  }
+
+  /* Cards en el PDF */
+  .print\\:shadow-none {
+    box-shadow: none !important;
+  }
+
+  .print\\:border {
+    border: 1pt solid #e5e7eb !important;
+  }
+
+  /* Secciones */
+  .profile-section {
+    page-break-inside: avoid;
+    margin-bottom: 0.8cm;
+  }
+
+  /* Narrativa kantiana destacada */
+  .kantian-narrative {
+    background: linear-gradient(to bottom, #f3f4f6, #ffffff) !important;
+    border-left: 4pt solid #1e40af !important;
+    padding: 0.5cm !important;
+    margin: 0.5cm 0 !important;
+    page-break-inside: avoid;
+  }
+
+  /* Barras de progreso en el PDF */
+  .progress-bar-container {
+    background: #e5e7eb !important;
+    height: 8pt !important;
+    border-radius: 4pt;
+  }
+
+  .progress-bar-fill {
+    background: #1e40af !important;
+    height: 100%;
+    border-radius: 4pt;
+  }
+
+  /* Métricas con estilo */
+  .metric-card {
+    background: #f9fafb !important;
+    border: 1pt solid #d1d5db !important;
+    padding: 0.4cm !important;
+    margin: 0.3cm 0 !important;
+    border-radius: 4pt;
+  }
+
+  /* Valores destacados */
+  .metric-value {
+    font-size: 18pt !important;
+    font-weight: bold !important;
+    color: #1e40af !important;
+  }
+
+  /* Párrafos de texto */
+  .narrative-text {
+    line-height: 1.6 !important;
+    text-align: justify !important;
+    margin: 0.3cm 0 !important;
+  }
+
+  /* Títulos de secciones */
+  h3, h4 {
+    color: #374151 !important;
+    margin-top: 0.5cm !important;
+    margin-bottom: 0.3cm !important;
+  }
+
+  /* Lista de dilemas respondidos */
+  .dilemma-list-item {
+    page-break-inside: avoid;
+    margin-bottom: 0.4cm;
+    border-bottom: 0.5pt solid #e5e7eb;
+    padding-bottom: 0.3cm;
+  }
+
+  /* Pie de página */
+  .profile-footer {
+    position: fixed;
+    bottom: 0.5cm;
+    right: 0.5cm;
+    font-size: 8pt;
+    color: #6b7280;
+  }
+
+  /* Evitar que elementos se corten entre páginas */
+  h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+  }
+
+  /* Grid de métricas */
+  .metrics-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 0.4cm !important;
+  }
+}

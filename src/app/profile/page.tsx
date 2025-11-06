@@ -5,6 +5,7 @@ import { useAppContext } from "@/contexts/AppContext";
 import { Button } from "@/components/ui/button";
 import { generateProfileNarrative } from "@/ai/flows/profile-narrative";
 import type { EthicalProfileAnalysis } from "@/lib/ethical-profile-calculator";
+import "./print-styles.css";
 import {
   Card,
   CardContent,
@@ -162,16 +163,23 @@ export default function ProfilePage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <Card className="shadow-xl" ref={profileRef}>
+      <Card className="shadow-xl print:shadow-none print:border" ref={profileRef}>
         <CardHeader>
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
-              <CardTitle className="text-3xl font-bold text-primary">
+              <CardTitle className="profile-title text-3xl font-bold text-primary">
                 Tu Perfil Ético
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="print:hidden">
                 Un resumen de tus reflexiones y perspectivas.
               </CardDescription>
+              <p className="hidden print:block text-sm text-muted-foreground mt-2">
+                Generado el {new Date().toLocaleDateString('es-ES', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                })}
+              </p>
             </div>
             <div className="print:hidden">
               <Button onClick={handlePrint} variant="outline">
@@ -181,25 +189,25 @@ export default function ProfilePage() {
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
-          <Card>
+          <Card className="profile-section print:shadow-none print:border">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="text-accent" />
+                <BarChart3 className="text-accent print:hidden" />
                 Resumen General
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="prose prose-sm max-w-none">
-                <p className="text-base leading-relaxed whitespace-pre-line">
+                <p className="narrative-text text-base leading-relaxed whitespace-pre-line">
                   {ethicalProfile.summary}
                 </p>
               </div>
 
               {/* Visualización mejorada de datos */}
               {ethicalProfile.visual_data.analysis && (
-                <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="mt-6 metrics-grid grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Tópicos Explorados */}
-                  <div className="p-4 rounded-lg bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20">
+                  <div className="metric-card p-4 rounded-lg bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20">
                     <h4 className="font-semibold text-sm text-primary mb-3 flex items-center gap-2">
                       📚 Tópicos Explorados
                     </h4>
@@ -210,13 +218,13 @@ export default function ProfilePage() {
                         <div key={topic} className="flex items-center justify-between text-sm">
                           <span className="text-muted-foreground">{topic}</span>
                           <div className="flex items-center gap-2">
-                            <div className="w-20 h-2 bg-secondary rounded-full overflow-hidden">
+                            <div className="progress-bar-container w-20 h-2 bg-secondary rounded-full overflow-hidden">
                               <div
-                                className="h-full bg-primary"
+                                className="progress-bar-fill h-full bg-primary"
                                 style={{ width: `${(avg as number) * 100}%` }}
                               />
                             </div>
-                            <span className="font-mono font-semibold text-xs w-12 text-right">
+                            <span className="metric-value font-mono font-semibold text-xs w-12 text-right">
                               {(avg as number).toFixed(2)}
                             </span>
                           </div>
@@ -226,7 +234,7 @@ export default function ProfilePage() {
                   </div>
 
                   {/* Métricas de Consistencia */}
-                  <div className="p-4 rounded-lg bg-gradient-to-br from-accent/5 to-accent/10 border border-accent/20">
+                  <div className="metric-card p-4 rounded-lg bg-gradient-to-br from-accent/5 to-accent/10 border border-accent/20">
                     <h4 className="font-semibold text-sm text-accent mb-3 flex items-center gap-2">
                       🎯 Consistencia Ética
                     </h4>
@@ -236,7 +244,7 @@ export default function ProfilePage() {
                           <span className="text-xs text-muted-foreground">
                             Coherencia general
                           </span>
-                          <span className="text-sm font-semibold">
+                          <span className="metric-value text-sm font-semibold">
                             {(
                               (ethicalProfile.visual_data.analysis.consistency as number) *
                               100
@@ -244,9 +252,9 @@ export default function ProfilePage() {
                             %
                           </span>
                         </div>
-                        <div className="w-full h-2 bg-secondary rounded-full overflow-hidden">
+                        <div className="progress-bar-container w-full h-2 bg-secondary rounded-full overflow-hidden">
                           <div
-                            className="h-full bg-accent"
+                            className="progress-bar-fill h-full bg-accent"
                             style={{
                               width: `${
                                 (ethicalProfile.visual_data.analysis.consistency as number) *
@@ -278,13 +286,13 @@ export default function ProfilePage() {
           </Card>
 
           {/* Narrativa Kantiana General */}
-          <Card className="bg-gradient-to-br from-primary/5 to-accent/5 border-primary/20">
+          <Card className="kantian-narrative profile-section bg-gradient-to-br from-primary/5 to-accent/5 border-primary/20 print:shadow-none print:border">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Lightbulb className="text-primary" />
+                <Lightbulb className="text-primary print:hidden" />
                 Reflexión Kantiana: "Y si todos..."
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="print:hidden">
                 Una narrativa filosófica basada en tu perfil ético completo
               </CardDescription>
             </CardHeader>
@@ -317,11 +325,11 @@ export default function ProfilePage() {
               ) : (
                 <div>
                   <div className="prose prose-sm max-w-none">
-                    <div className="whitespace-pre-wrap text-foreground leading-relaxed">
+                    <div className="narrative-text whitespace-pre-wrap text-foreground leading-relaxed">
                       {kantianNarrative}
                     </div>
                   </div>
-                  <div className="mt-4 flex justify-end">
+                  <div className="mt-4 flex justify-end print:hidden">
                     <Button
                       onClick={handleGenerateNarrative}
                       variant="outline"
