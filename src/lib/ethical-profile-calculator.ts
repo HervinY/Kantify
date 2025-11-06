@@ -198,18 +198,18 @@ export function generateProfileSummary(
 
   return `Has reflexionado sobre ${totalDilemmas} dilema${totalDilemmas === 1 ? '' : 's'} ético${totalDilemmas === 1 ? '' : 's'}, explorando ${topicCount} dimensión${topicCount === 1 ? '' : 'es'} de la filosofía moral.
 
-Tu perfil revela una tendencia ética **${tendencyText}**, con un patrón de decisión **${consistencyText}**. ${distributionText}.
+Tu perfil revela una tendencia ética ${tendencyText.toUpperCase()}, con un patrón de decisión ${consistencyText.toUpperCase()}. ${distributionText}.
 
 ${
   patterns.mostConservativeTopic && patterns.mostLiberalTopic && patterns.mostConservativeTopic !== patterns.mostLiberalTopic
-    ? `\n🔍 **Patrones identificados:**
-• Mayor cautela en **${patterns.mostConservativeTopic}**
-• Mayor apertura en **${patterns.mostLiberalTopic}**
+    ? `\n🔍 Patrones identificados:
+• Mayor cautela en ${patterns.mostConservativeTopic}
+• Mayor apertura en ${patterns.mostLiberalTopic}
 
 Esta tensión entre tópicos revela una ética multidimensional que adapta sus principios según el contexto.`
     : patterns.mostConsistentTopic
-    ? `\n🎯 **Patrón destacado:**
-Muestras mayor consistencia en tus decisiones sobre **${patterns.mostConsistentTopic}**, lo que sugiere principios bien definidos en esta área.`
+    ? `\n🎯 Patrón destacado:
+Muestras mayor consistencia en tus decisiones sobre ${patterns.mostConsistentTopic}, lo que sugiere principios bien definidos en esta área.`
     : ''
 }`;
 }
