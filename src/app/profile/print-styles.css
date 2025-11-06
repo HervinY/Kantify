@@ -1,11 +1,6 @@
 /* Estilos específicos para la impresión del PDF del Perfil Ético */
 
 @media print {
-  /* Ocultar elementos innecesarios */
-  .print\\:hidden {
-    display: none !important;
-  }
-
   /* Configuración de página */
   @page {
     size: A4;
@@ -31,19 +26,12 @@
     padding-bottom: 0.3cm;
   }
 
-  /* Cards en el PDF */
-  .print\\:shadow-none {
-    box-shadow: none !important;
-  }
-
-  .print\\:border {
-    border: 1pt solid #e5e7eb !important;
-  }
-
   /* Secciones */
   .profile-section {
     page-break-inside: avoid;
     margin-bottom: 0.8cm;
+    box-shadow: none !important;
+    border: 1pt solid #e5e7eb !important;
   }
 
   /* Narrativa kantiana destacada */
