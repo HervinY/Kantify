@@ -75,7 +75,7 @@ export default function ProfilePage() {
   }, [sessionUUID, answeredDilemmas.length, generateProfile]); // Ahora generateProfile está memoizado
 
   const handlePrint = useReactToPrint({
-    content: () => profileRef.current,
+    contentRef: profileRef,
     documentTitle: `Kantify-Perfil-${sessionUUID || "anonimo"}`,
   });
 
